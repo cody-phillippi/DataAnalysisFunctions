@@ -1,15 +1,18 @@
 ## remove outliers from your df using 
 def outlier_removal(df):
     for col in df.columns:
-        print("capping the ",col)
+        print("cleaning...",col)
         if (((df[col].dtype)=='float64') | ((df[col].dtype)=='int64')):
-            percentiles = df[col].quantile([0.01,0.99]).values
-            df[col][df[col] <= percentiles[0]] = percentiles[0]
-            df[col][df[col] >= percentiles[1]] = percentiles[1]
+            Q1 = df[col].quantile(0.25)
+            Q3 = df[col].quantile(0.75)
+            IQR = Q3 - Q1
+            lower = Q1 - 1.5 * IQR
+            upper = Q3 + 1.5 * IQR
+            df = df[df[col].between(lower, upper)]
         else:
-            df[col]=df[col]
+            df[col]
     return df
-	
+
 	
 	
 ## use this function to remove outliers based on specific groupings. For example: 
@@ -52,4 +55,9 @@ def grouping_outlier_removal(df, starting_lst, outlier_col, new_lst, filter_col)
 
 		print("Done!")
     
-    
+## Calculate VIF and Standard scaling in one function to help understand multicolinearity
+## of dependent vars. Must import StandardScaler lib for this to work
+def vif_score(x):
+    scaler = StandardScaler()
+    arr = scaler.fit_transform(x)
+    return pd.DataFrame([[x.columns[i], variance_inflation_factor(arr,i)] for i in range(arr.shape[1])], columns=["FEATURE", "VIF_SCORE"])
