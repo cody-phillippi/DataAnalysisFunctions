@@ -1,0 +1,55 @@
+## remove outliers from your df using 
+def outlier_removal(df):
+    for col in df.columns:
+        print("capping the ",col)
+        if (((df[col].dtype)=='float64') | ((df[col].dtype)=='int64')):
+            percentiles = df[col].quantile([0.01,0.99]).values
+            df[col][df[col] <= percentiles[0]] = percentiles[0]
+            df[col][df[col] >= percentiles[1]] = percentiles[1]
+        else:
+            df[col]=df[col]
+    return df
+	
+	
+	
+## use this function to remove outliers based on specific groupings. For example: 
+## I used this to remove PG outliers from each offer type group so we could getr an accurate average deal size of each 
+## you will need numpy and pandas already imported for this to work
+
+## input your list of items that you are wanting to do grouping wise outlier removal
+## input your dataframe
+## input the column or columns you are wanting to check for outliers 
+## input your grouping / filtering column
+## input the name of your output list that you are going to want to store your items in
+def grouping_outlier_removal(df, starting_lst, outlier_col, new_lst, filter_col):
+ 
+		## create a list that your outliers are going
+		## initialize 
+		new_lst = [] 
+		
+		## create a new unique ID column that we can use to indentify each row (i just used the dataframes index)
+		df['tmp_id'] = df.index
+
+		## loop through your list of groupings 
+		for i in starting_lst: 
+			
+			##create a tmp df that we can filter based on without effecting the main filter 
+			tmp = df[df.filter_col == i]
+			
+			## filter tmp column using zscore outlier removal 
+			tmp = tmp[(np.abs(stats.zscore(tmp.outlier_col)) > 3)]
+			
+			##create a tmp list to store all of the unique ids into temporarily 
+			tmp_list = tmp.tmp_id.to_list()
+
+			## avoid an NoneType error here 
+			## check if the list has any values
+			if len(tmp_list) > 0: 
+				## add the tmp list items to our master outlier list
+				new_lst.extend(tmp_list)
+			else: 
+				## or else move on
+
+		print("Done!")
+    
+    
